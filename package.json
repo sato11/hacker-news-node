@@ -5,7 +5,9 @@
   "author": "Sato Junichi <22004610+sato11@users.noreply.github.com>",
   "license": "MIT",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "graphql-yoga": "^1.18.3",
+    "jsonwebtoken": "^8.5.1",
     "prisma-client-lib": "^1.34.10"
   },
   "devDependencies": {
