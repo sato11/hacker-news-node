@@ -1,49 +1,34 @@
 const { GraphQLServer } = require('graphql-yoga');
-
-const links = [
-  {
-    id: 'link-0',
-    url: 'www.howtographql.com',
-    description: 'Fullstack tutorial for GraphQL',
-  },
-];
-
-let idCount = links.length;
+const { prisma } = require('./generated/prisma-client');
 
 const resolvers = {
   Query: {
     info: () => `This is the API of a Hackernews Clone`,
-    feed: () => links,
+    feed: (root, args, context, info) => {
+      return context.prisma.links();
+    },
   },
   Mutation: {
-    post: (parent, args) => {
-      const link = {
-        id: `link-${idCount++}`,
-        description: args.description,
+    post: (root, args, context) => {
+      return context.prisma.createLink({
         url: args.url,
-      };
-      links.push(link);
-      return link;
+        description: args.description,
+      });
     },
-    updateLink: (parent, args) => {
-      const link = links.find(l => l.id === args.id);
-      if (!link) return null;
-      const index = links.indexOf(link);
-      links.splice(index, 1);
-      const updatedLink = {
-        id: link.id,
-        url: args.url || link.url,
-        description: args.description || link.description
-      };
-      links.push(updatedLink);
-      return updatedLink;
+    updateLink: (root, { id, ...args }, context) => {
+      return context.prisma.updateLink({
+        data: args,
+        where: {
+          id,
+        },
+      })
     },
-    deleteLink: (parent, args) => {
-      const link = links.find(l => l.id === args.id);
-      if (!link) return null;
-      const index = links.indexOf(link);
-      links.splice(index, 1);
-      return link;
+    deleteLink: (root, { id }, context) => {
+      return context.prisma.deleteLink({
+        where: {
+          id,
+        },
+      })
     },
   },
 };
@@ -51,6 +36,7 @@ const resolvers = {
 const server = new GraphQLServer({
   typeDefs: './src/schema.graphql',
   resolvers,
+  context: { prisma },
 });
 
 server.start(() => console.log(`Server is running on http://localhost:4000`));
