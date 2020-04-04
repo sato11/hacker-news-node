@@ -8,15 +8,43 @@ const links = [
   },
 ];
 
+let idCount = links.length;
+
 const resolvers = {
   Query: {
     info: () => `This is the API of a Hackernews Clone`,
     feed: () => links,
   },
-  Link: {
-    id: (parent) => parent.id,
-    description: (parent) => parent.description,
-    url: (parent) => parent.url,
+  Mutation: {
+    post: (parent, args) => {
+      const link = {
+        id: `link-${idCount++}`,
+        description: args.description,
+        url: args.url,
+      };
+      links.push(link);
+      return link;
+    },
+    updateLink: (parent, args) => {
+      const link = links.find(l => l.id === args.id);
+      if (!link) return null;
+      const index = links.indexOf(link);
+      links.splice(index, 1);
+      const updatedLink = {
+        id: link.id,
+        url: args.url || link.url,
+        description: args.description || link.description
+      };
+      links.push(updatedLink);
+      return updatedLink;
+    },
+    deleteLink: (parent, args) => {
+      const link = links.find(l => l.id === args.id);
+      if (!link) return null;
+      const index = links.indexOf(link);
+      links.splice(index, 1);
+      return link;
+    },
   },
 };
 
